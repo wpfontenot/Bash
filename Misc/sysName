@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+#
+#
+NAME=unraid
+#
+if [[ "$HOSTNAME" == "$NAME" ]]; then 
+	/usr/local/scripts/unload
+else 
+	/usr/local/scripts/load
+fi

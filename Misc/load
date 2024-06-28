@@ -1,0 +1,4 @@
+#!/bin/bash
+#
+#
+uptime | cut -d' ' -f14 | cut -d',' -f1
