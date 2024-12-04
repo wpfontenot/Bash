@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+#
+#UPTIME=$(uptime | awk -F ':' '{ print $NF }')
+
+MID=0.49
+HIGH=0.99
+
+ONE_MAV=$(uptime | awk -F ':' '{ print $NF }' | cut -d',' -f1)
+FIVE_MAV=$(uptime | awk -F ':' '{ print $NF }' | cut -d',' -f2)
+FIFTEEN_MAV=$(uptime | awk -F ':' '{ print $NF }' | cut -d',' -f3)
+
+ONE="${B_GREEN}$ONE_MAV${RESET}"
+FIVE="${B_GREEN}$FIVE_MAV${RESET}"
+FIFTEEN="$B_GREEN$FIFTEEN_MAV${RESET}"
+
+if (( $( echo "$ONE_MAV > $HIGH" | bc -l) )); then
+
+	unset ONE
+	ONE="${B_RED}$ONE_MAV${RESET}"
+
+elif (( $( echo "$ONE_MAV > $MID" | bc -l) )); then
+
+	unset ONE
+	ONE="${B_YELLOW}$ONE_MAV${RESET}"
+
+fi
+
+if (( $( echo "$FIVE_MAV > $HIGH" | bc -l) )); then
+
+	unset FIVE
+	FIVE="${B_RED}$FIVE_MAV${RESET}"
+
+elif (( $( echo "$FIVE_MAV > $MID" | bc -l) )); then
+
+	unset FIVE
+	FIVE="${B_YELLOW}$FIVE_MAV${RESET}"
+
+fi
+
+if (( $( echo "$FIFTEEN_MAV > $HIGH" | bc -l) )); then
+
+	unset FIFTEEN
+	FIFTEEN="${B_RED}$FIFTEEN_MAV${RESET}"
+
+elif (( $( echo "$FIFTEEN_MAV > $MID" | bc -l) )); then
+
+	unset FIFTEEN
+	FIFTEEN="${B_YELLOW}$FIFTEEN_MAV${RESET}"
+
+fi
+
+if [[ "$UID" -eq "0" ]]; then
+	echo "${ONE} ${B_RED}:${RESET}${FIVE} ${B_RED}:${RESET}${FIFTEEN}"
+else
+	echo "${ONE} ${B_BLUE}:${RESET}${FIVE} ${B_BLUE}:${RESET}${FIFTEEN}"
+fi

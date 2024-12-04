@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+#
+# Setup
+###############################################################################
+load=$(uptime | awk -F':' '{ print $NF }')
+
+one_min_avg="$(echo $load | cut -d',' -f1)"
+five_min_avg="$(echo $load | cut -d',' -f2)"
+fifteen_min_avg="$(echo $load | cut -d',' -f3)"
+
+echo " $one_min_avg /$five_min_avg /$fifteen_min_avg"

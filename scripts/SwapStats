@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# /usr/local/scripts/lsbytesum written by Paul Fontenot
+#
+# lsbytesum - sum the number of bytes in a directory listing
+# and output the size in B, KiB, MiB, or GiB as appropriate.
+#
+# There are a number of compromises here:
+#  - "ls -l" outputs a file count as the first line, but it doesn't have
+#    a fifth field, so it can be ignored ...
+#  - "ls -l" doesn't list hidden files: that could be done with "ls -lA"
+#
+# How many decimal places? (zero or positive integer)
+###############################################################################
+let scale=2
+
+# Use awk to sum the fifth field of the list of files (only):
+# TotalBytes="$(ls -l | awk '/^-/ {total+=$5} ; END {printf ("%.0f", total) }')"
+C_SWAP=$(cat /proc/meminfo | grep SwapCached | awk -F' ' '{ print $2 }')
+T_SWAP=$(cat /proc/meminfo | grep SwapTotal | awk -F' ' '{ print $2 }')
+F_SWAP=$(cat /proc/meminfo | grep SwapFree | awk -F' ' '{ print $2 }')
+
+let CachedBytes="$C_SWAP * 1024"
+let TotalBytes="$T_SWAP * 1024"
+let FreeBytes="$F_SWAP * 1024"
+
+# if CachedBytes is empty, set it to zero:
+if [ "${C_SWAP}x" = "x" ]
+then
+  let FreeBytes=0
+fi
+# if TotalBytes is empty, set it to zero:
+if [ "${T_SWAP}x" = "x" ]
+then
+  let TotalBytes=0
+fi
+# if FreeBytes is empty, set it to zero:
+if [ "${F_SWAP}x" = "x" ]
+then
+  let FreeBytes=0
+fi
+
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$CachedBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${CachedBytes}B" ;;
+  4 | 5 | 6) c_swap="$(echo -e "scale=${scale} \n${CachedBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) c_swap="$(echo -e "scale=${scale} \n${CachedBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) c_swap="$(echo -e "scale=${scale} \n${CachedBytes}/1073741824 " | bc)GiB" ;;
+  *) c_swap="$(echo -e "scale=${scale} \n${CachedBytes}/1099511627776 " | bc)TiB" ;;
+esac
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$TotalBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${TotalBytes}B" ;;
+  4 | 5 | 6) t_swap="$(echo -e "scale=${scale} \n${TotalBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) t_swap="$(echo -e "scale=${scale} \n${TotalBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) t_swap="$(echo -e "scale=${scale} \n${TotalBytes}/1073741824 " | bc)GiB" ;;
+  *) t_swap="$(echo -e "scale=${scale} \n${TotalBytes}/1099511627776 " | bc)TiB" ;;
+esac
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$FreeBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${FreeBytes}B" ;;
+  4 | 5 | 6) f_swap="$(echo -e "scale=${scale} \n${FreeBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) f_swap="$(echo -e "scale=${scale} \n${FreeBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) f_swap="$(echo -e "scale=${scale} \n${FreeBytes}/1073741824 " | bc)GiB" ;;
+  *) f_swap="$(echo -e "scale=${scale} \n${FreeBytes}/1099511627776 " | bc)TiB" ;;
+esac
+
+echo "$c_swap / $t_swap / $f_swap"

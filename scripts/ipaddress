@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+#
+#
+#
+###############################################################################
+IPADDRESS=$(hostname -I)
+
+if [ "$IPADDRESS" ]; then
+	echo "$IPADDRESS"
+else
+	echo "Offline"
+fi

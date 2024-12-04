@@ -1,8 +1,0 @@
-image: "alpine"
-
-before_script:
-  - apk add make bats
-
-bats_check:
-  script:
-    - make test

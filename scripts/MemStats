@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# /usr/local/scripts/MemStats written by Paul Fontenot
+#
+# How many decimal places? (zero or positive integer)
+###############################################################################
+(( scale=2 ))
+
+# Use awk to sum the fifth field of the list of files (only):
+# TotalBytes="$(ls -l | awk '/^-/ {total+=$5} ; END {printf ("%.0f", total) }')"
+A_MEM=$(grep MemAvailable /proc/meminfo | awk -F' ' '{ print $2 }')
+F_MEM=$(grep MemFree /proc/meminfo | awk -F' ' '{ print $2 }')
+T_MEM=$(grep MemTotal /proc/meminfo | awk -F' ' '{ print $2 }')
+
+(( AvailableBytes="$A_MEM * 1024" ))
+(( FreeBytes="$F_MEM * 1024" ))
+(( TotalBytes="$T_MEM * 1024" ))
+
+
+# if AvailableBytes is empty, set it to zero:
+if [ "${A_MEM}x" = "x" ]
+then
+  (( AvailableBytes=0 ))
+fi
+
+# if FreeBytes is empty, set it to zero:
+if [ "${F_MEM}x" = "x" ]
+then
+  (( FreeBytes=0 ))
+fi
+
+# if TotalBytes is empty, set it to zero:
+if [ "${T_MEM}x" = "x" ]
+then
+  (( TotalBytes=0 ))
+fi
+
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$AvailableBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${AvailableBytes}B" ;;
+  4 | 5 | 6) a_memory="$(echo -e "scale=${scale} \n${AvailableBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) a_memory="$(echo -e "scale=${scale} \n${AvailableBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) a_memory="$(echo -e "scale=${scale} \n${AvailableBytes}/1073741824 " | bc)GiB" ;;
+  *) a_memory="$(echo -e "scale=${scale} \n${AvailableBytes}/1099511627776 " | bc)TiB" ;;
+esac
+
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$FreeBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${FreeBytes}B" ;;
+  4 | 5 | 6) f_memory="$(echo -e "scale=${scale} \n${FreeBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) f_memory="$(echo -e "scale=${scale} \n${FreeBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) f_memory="$(echo -e "scale=${scale} \n${FreeBytes}/1073741824 " | bc)GiB" ;;
+  *) f_memory="$(echo -e "scale=${scale} \n${FreeBytes}/1099511627776 " | bc)TiB" ;;
+esac
+
+# Count digits, then print out B, KiB, MiB, GiB, or TiB:
+case $(echo -n "$TotalBytes" | wc -c) in
+  1 | 2 | 3) echo -n "${TotalBytes}B" ;;
+  4 | 5 | 6) t_memory="$(echo -e "scale=${scale} \n${TotalBytes}/1024 " | bc)KiB" ;;
+  7 | 8 | 9) t_memory="$(echo -e "scale=${scale} \n${TotalBytes}/1048576 " | bc)MiB" ;;
+  10 | 11 | 12) t_memory="$(echo -e "scale=${scale} \n${TotalBytes}/1073741824 " | bc)GiB" ;;
+  *) t_memory="$(echo -e "scale=${scale} \n${TotalBytes}/1099511627776 " | bc)TiB" ;;
+esac
+
+
+echo "$a_memory : $f_memory : $t_memory"
